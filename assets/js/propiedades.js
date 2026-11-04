@@ -91,27 +91,27 @@ const propiedades_alquiler = [
   },
 ];
 
-const formatMoney = (value) => {
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+function formatMoney(value) {
+  return "$" + value;
+}
 
-const renderPermiso = (condicion, tipo) => {
+function renderPermiso(condicion, tipo) {
   if (tipo === "smoke") {
-    return condicion
-      ? '<p class="text-success"><i class="fas fa-smoking"></i> Permitido fumar</p>'
-      : '<p class="text-danger"><i class="fas fa-smoking-ban"></i> No se permite fumar</p>';
+    if (condicion === true) {
+      return '<p class="text-success">Permitido fumar</p>';
+    } else {
+      return '<p class="text-danger">No se permite fumar</p>';
+    }
+  } else {
+    if (condicion === true) {
+      return '<p class="text-success">Mascotas permitidas</p>';
+    } else {
+      return '<p class="text-danger">No se permiten mascotas</p>';
+    }
   }
+}
 
-  return condicion
-    ? '<p class="text-success"><i class="fas fa-paw"></i> Mascotas permitidas</p>'
-    : '<p class="text-danger"><i class="fa-solid fa-ban"></i> No se permiten mascotas</p>';
-};
-
-const crearCard = (propiedad) => {
+function crearCard(propiedad) {
   return `
     <div class="col-md-4 mb-4">
       <div class="card h-100 shadow-sm">
@@ -124,47 +124,36 @@ const crearCard = (propiedad) => {
         <div class="card-body">
           <h5 class="card-title">${propiedad.nombre}</h5>
           <p class="card-text">${propiedad.descripcion}</p>
-          <p><i class="fas fa-map-marker-alt"></i> ${propiedad.ubicacion}</p>
-          <p>
-            <i class="fas fa-bed"></i> ${propiedad.habitaciones} Habitaciones
-            |
-            <i class="fas fa-bath"></i> 2 Baños
-          </p>
-          <p><i class="fas fa-dollar-sign"></i> ${formatMoney(propiedad.costo)}</p>
+          <p>${propiedad.ubicacion}</p>
+          <p>${propiedad.habitaciones} Habitaciones | 2 Baños</p>
+          <p>${formatMoney(propiedad.costo)}</p>
           ${renderPermiso(propiedad.smoke, "smoke")}
           ${renderPermiso(propiedad.pets, "pets")}
         </div>
       </div>
     </div>
   `;
-};
+}
 
-const renderPage = (lista, contenedorId) => {
+function renderPage(lista, contenedorId, cantidad) {
   const contenedor = document.getElementById(contenedorId);
-  if (!contenedor) return;
 
-  contenedor.innerHTML = lista.map(crearCard).join("");
-};
+  if (contenedor !== null) {
+    contenedor.innerHTML = "";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const page = document.body.dataset.page;
-
-  if (page === "venta") {
-    renderPage(propiedades_venta, "propiedades");
+    for (let i = 0; i < cantidad; i++) {
+      contenedor.innerHTML += crearCard(lista[i]);
+    }
   }
+}
 
-  if (page === "alquiler") {
-    renderPage(propiedades_alquiler, "propiedades");
-  }
+const page = document.body.dataset.page;
 
-  const ventasHome = document.getElementById("lista-ventas");
-  const alquileresHome = document.getElementById("lista-alquileres");
-
-  if (ventasHome) {
-    ventasHome.innerHTML = propiedades_venta.slice(0, 3).map(crearCard).join("");
-  }
-
-  if (alquileresHome) {
-    alquileresHome.innerHTML = propiedades_alquiler.slice(0, 3).map(crearCard).join("");
-  }
-});
+if (page === "venta") {
+  renderPage(propiedades_venta, "propiedades", propiedades_venta.length);
+} else if (page === "alquiler") {
+  renderPage(propiedades_alquiler, "propiedades", propiedades_alquiler.length);
+} else {
+  renderPage(propiedades_venta, "lista-ventas", 3);
+  renderPage(propiedades_alquiler, "lista-alquileres", 3);
+}
